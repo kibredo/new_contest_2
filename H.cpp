@@ -1,84 +1,91 @@
 #include <iostream>
 #include <vector>
 
-void GetSiftedUp(std::vector<int>& heap, int the_index) {
-  if (the_index != 1) {
-    int tmp_ind = the_index / 2;
-    if (heap[the_index] < heap[tmp_ind]) {
-      std::swap(heap[the_index], heap[tmp_ind]);
-      GetSiftedUp(heap, tmp_ind);
+class the_heap {
+ private:
+  void GetSilentlyExtracted() {
+    std::swap(heap[1], heap[heap.size() - 1]);
+    heap.pop_back();
+    GetSiftedDown(1);
+  }
+ public:
+  std::vector<int> heap;
+  void GetSiftedUp(int the_index) {
+    if (the_index != 1) {
+      int tmp_ind = the_index / 2;
+      if (heap[the_index] < heap[tmp_ind]) {
+        std::swap(heap[the_index], heap[tmp_ind]);
+        GetSiftedUp(tmp_ind);
+      }
     }
   }
-}
 
-void GetSiftedDown(std::vector<int>& heap, int the_index) {
-  if (2 * the_index < (int)heap.size()) {
-    int tmp_ind = the_index * 2;
-    if (tmp_ind + 1 < (int)heap.size() && heap[tmp_ind + 1] < heap[tmp_ind]) {
-      ++tmp_ind;
+  void GetSiftedDown(int the_index) {
+    if (2 * the_index < (int)heap.size()) {
+      int tmp_ind = the_index * 2;
+      if (tmp_ind + 1 < (int)heap.size() && heap[tmp_ind + 1] < heap[tmp_ind]) {
+        ++tmp_ind;
+      }
+      if (heap[the_index] > heap[tmp_ind]) {
+        std::swap(heap[the_index], heap[tmp_ind]);
+        GetSiftedDown(tmp_ind);
+      }
     }
-    if (heap[the_index] > heap[tmp_ind]) {
-      std::swap(heap[the_index], heap[tmp_ind]);
-      GetSiftedDown(heap, tmp_ind);
+  }
+
+  void GetInserted(int value) {
+    heap.push_back(value);
+    int the_index = (int)heap.size() - 1;
+    GetSiftedUp(the_index);
+  }
+
+  void DoTheThing(the_heap& delete_heap) {
+    while (heap.size() > 1 && delete_heap.heap.size() > 1 &&
+          heap[1] == delete_heap.heap[1]) {
+      GetSilentlyExtracted();
+      delete_heap.GetSilentlyExtracted();
     }
   }
-}
 
-void GetInserted(std::vector<int>& heap, int value) {
-  heap.push_back(value);
-  int the_index = (int)heap.size() - 1;
-  GetSiftedUp(heap, the_index);
-}
-
-void GetSilentlyExtracted(std::vector<int>& heap) {
-  std::swap(heap[1], heap[heap.size() - 1]);
-  heap.pop_back();
-  GetSiftedDown(heap, 1);
-}
-
-void DoTheThing(std::vector<int>& heap, std::vector<int>& delete_heap) {
-  while (heap.size() > 1 && delete_heap.size() > 1 &&
-         heap[1] == delete_heap[1]) {
-    GetSilentlyExtracted(heap);
-    GetSilentlyExtracted(delete_heap);
+  void PrintTheAnswer() {
+    if (heap.size() == 1) {
+      std::cout << "error" << '\n';
+    } else {
+      std::cout << std::abs(heap[1]) << std::endl;
+    }
   }
-}
 
-void PrintTheAnswer(std::vector<int>& heap) {
-  if (heap.size() == 1) {
-    std::cout << "error" << '\n';
-  } else {
-    std::cout << std::abs(heap[1]) << std::endl;
+  void GetMin(the_heap& delete_heap) {
+    DoTheThing(delete_heap);
+    PrintTheAnswer();
   }
-}
 
-void GetMin(std::vector<int>& heap, std::vector<int>& delete_heap) {
-  DoTheThing(heap, delete_heap);
-  PrintTheAnswer(heap);
-}
-
-void GetExtracted(std::vector<int>& heap, std::vector<int>& delete_heap,
-                  std::vector<int>& negative_delete_heap) {
-  DoTheThing(heap, delete_heap);
-  PrintTheAnswer(heap);
-  if (heap.size() > 1) {
-    GetInserted(negative_delete_heap, (-1) * heap[1]);
-    GetInserted(delete_heap, heap[1]);
+  void GetExtracted(the_heap& delete_heap,
+                    the_heap& negative_delete_heap) {
+    DoTheThing(delete_heap);
+    PrintTheAnswer();
+    if (heap.size() > 1) {
+      negative_delete_heap.GetInserted((-1) * heap[1]);
+      delete_heap.GetInserted(heap[1]);
+    }
   }
-}
-void GetCleared(std::vector<int>& heap) {
-  heap.resize(0);
-  heap.push_back(0);
-}
+  void GetCleared() {
+    heap.resize(0);
+    heap.push_back(0);
+  }
+  size_t size() const {
+    return this->heap.size();
+  }
+};
 
-void GetMaxExtracted(std::vector<int>& negative_heap,
-                     std::vector<int>& negative_delete_heap,
-                     std::vector<int>& delete_heap) {
-  DoTheThing(negative_heap, negative_delete_heap);
-  PrintTheAnswer(negative_heap);
-  if (negative_heap.size() > 1) {
-    GetInserted(negative_delete_heap, negative_heap[1]);
-    GetInserted(delete_heap, (-1) * negative_heap[1]);
+void GetMaxExtracted(the_heap& negative_heap,
+                     the_heap& negative_delete_heap,
+                     the_heap& delete_heap) {
+  negative_heap.DoTheThing(negative_delete_heap);
+  negative_heap.PrintTheAnswer();
+  if (negative_heap.heap. size() > 1) {
+    negative_delete_heap.GetInserted(negative_heap.heap[1]);
+    delete_heap.GetInserted((-1) * negative_heap.heap[1]);
   }
 }
 
@@ -88,14 +95,14 @@ int main() {
   std::cout.tie(0);
   int quantity = 0;
   std::cin >> quantity;
-  std::vector<int> heap(0);
-  std::vector<int> negative_heap(0);
-  std::vector<int> delete_heap(0);
-  std::vector<int> negative_delete_heap(0);
-  heap.push_back(0);
-  negative_heap.push_back(0);
-  delete_heap.push_back(0);
-  negative_delete_heap.push_back(0);
+  the_heap heap;
+  the_heap negative_heap;
+  the_heap delete_heap;
+  the_heap negative_delete_heap;
+  heap.heap.push_back(0);
+  negative_heap.heap.push_back(0);
+  delete_heap.heap.push_back(0);
+  negative_delete_heap.heap.push_back(0);
   int value = 0;
   std::string input;
   for (int tmp = 0; tmp < quantity; ++tmp) {
@@ -103,20 +110,20 @@ int main() {
     if (input == "insert") {
       std::cin >> value;
       std::cout << "ok" << '\n';
-      GetInserted(heap, value);
-      GetInserted(negative_heap, value * (-1));
+      heap.GetInserted(value);
+      negative_heap.GetInserted(value * (-1));
     } else if (input == "clear") {
       std::cout << "ok" << '\n';
-      GetCleared(heap);
-      GetCleared(delete_heap);
-      GetCleared(negative_delete_heap);
-      GetCleared(negative_heap);
+      heap.GetCleared();
+      delete_heap.GetCleared();
+      negative_delete_heap.GetCleared();
+      negative_heap.GetCleared();
     } else if (input == "extract_min") {
-      GetExtracted(heap, delete_heap, negative_delete_heap);
+      heap.GetExtracted(delete_heap, negative_delete_heap);
     } else if (input == "get_min") {
-      GetMin(heap, delete_heap);
+      heap.GetMin(delete_heap);
     } else if (input == "get_max") {
-      GetMin(negative_heap, negative_delete_heap);
+      negative_heap.GetMin(negative_delete_heap);
     } else if (input == "extract_max") {
       GetMaxExtracted(negative_heap, negative_delete_heap, delete_heap);
     } else if (input == "size") {
