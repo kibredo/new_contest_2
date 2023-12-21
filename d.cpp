@@ -2,92 +2,97 @@
 #include <stack>
 #include <string>
 
-void MoveStackElements(std::stack<int>& hat, std::stack<int>& help_hat,
-                       std::stack<int>& extra_hat,
-                       std::stack<int>& extra_help_hat) {
-  while (!hat.empty()) {
-    extra_hat.push(hat.top());
-    if (extra_help_hat.empty()) {
-      extra_help_hat.push(hat.top());
+class the_hat {
+ public:
+  std::stack<int> hat;
+  void MoveStackElements(the_hat& help_hat,
+                         the_hat& extra_hat,
+                         the_hat& extra_help_hat) {
+    while (!hat.empty()) {
+      extra_hat.hat.push(hat.top());
+      if (extra_help_hat.hat.empty()) {
+        extra_help_hat.hat.push(hat.top());
+      } else {
+        extra_help_hat.hat.push(std::min(hat.top(), extra_help_hat.hat.top()));
+      }
+      hat.pop();
+      help_hat.hat.pop();
+    }
+  }
+
+  void GetEnqueued(the_hat& help_hat, int& iqlevel) {
+    hat.push(iqlevel);
+    if (help_hat.hat.empty()) {
+      help_hat.hat.push(iqlevel);
     } else {
-      extra_help_hat.push(std::min(hat.top(), extra_help_hat.top()));
+      help_hat.hat.push(std::min(help_hat.hat.top(), iqlevel));
     }
-    hat.pop();
-    help_hat.pop();
+    std::cout << "ok" << '\n';
   }
-}
 
-void GetEnqueued(std::stack<int>& hat, std::stack<int>& help_hat,
-                 int& iqlevel) {
-  hat.push(iqlevel);
-  if (help_hat.empty()) {
-    help_hat.push(iqlevel);
-  } else {
-    help_hat.push(std::min(help_hat.top(), iqlevel));
-  }
-  std::cout << "ok" << '\n';
-}
-
-void GetDequeued(std::stack<int>& hat, std::stack<int>& help_hat,
-                 std::stack<int>& extra_hat, std::stack<int>& extra_help_hat) {
-  if (hat.empty() && extra_hat.empty()) {
-    std::cout << "error" << '\n';
-  } else {
-    if (extra_hat.empty()) {
-      MoveStackElements(hat, help_hat, extra_hat, extra_help_hat);
+  void GetDequeued(the_hat& help_hat, the_hat& extra_hat, the_hat& extra_help_hat) {
+    if (hat.empty() && extra_hat.hat.empty()) {
+      std::cout << "error" << '\n';
+    } else {
+      if (extra_hat.hat.empty()) {
+        MoveStackElements(help_hat, extra_hat, extra_help_hat);
+      }
+      std::cout << extra_hat.hat.top() << '\n';
+      extra_hat.hat.pop();
+      extra_help_hat.hat.pop();
     }
-    std::cout << extra_hat.top() << '\n';
-    extra_hat.pop();
-    extra_help_hat.pop();
   }
-}
 
-void GetFronted(std::stack<int>& hat, std::stack<int>& help_hat,
-                std::stack<int>& extra_hat, std::stack<int>& extra_help_hat) {
-  if (hat.empty() && extra_hat.empty()) {
-    std::cout << "error";
-  } else {
-    if (extra_hat.empty()) {
-      MoveStackElements(hat, help_hat, extra_hat, extra_help_hat);
+  void GetFronted(the_hat& help_hat, the_hat& extra_hat,
+                  the_hat& extra_help_hat) {
+    if (hat.empty() && extra_hat.hat.empty()) {
+      std::cout << "error";
+    } else {
+      if (extra_hat.hat.empty()) {
+        MoveStackElements(help_hat, extra_hat, extra_help_hat);
+      }
+      std::cout << extra_hat.hat.top();
     }
-    std::cout << extra_hat.top();
+    std::cout << '\n';
   }
-  std::cout << '\n';
-}
 
-void GetCleared(std::stack<int>& hat, std::stack<int>& help_hat,
-                std::stack<int>& extra_hat, std::stack<int>& extra_help_hat) {
-  while (!hat.empty()) {
-    hat.pop();
-    help_hat.pop();
+  void GetCleared(the_hat& help_hat, the_hat& extra_hat,
+                  the_hat& extra_help_hat) {
+    while (!hat.empty()) {
+      hat.pop();
+      help_hat.hat.pop();
+    }
+    while (!extra_hat.hat.empty()) {
+      extra_hat.hat.pop();
+      extra_help_hat.hat.pop();
+    }
+    std::cout << "ok" << '\n';
   }
-  while (!extra_hat.empty()) {
-    extra_hat.pop();
-    extra_help_hat.pop();
+  size_t size() const {
+    return this->hat.size();
   }
-  std::cout << "ok" << '\n';
-}
+};
 
-void GetMin(std::stack<int>& help_hat, std::stack<int>& extra_help_hat) {
-  if (extra_help_hat.empty() && help_hat.empty()) {
-    std::cout << "error" << '\n';
+void GetMin(the_hat& help_hat, the_hat& extra_help_hat) {
+    if (extra_help_hat.hat.empty() && help_hat.hat.empty()) {
+      std::cout << "error" << '\n';
+    }
+    if (!extra_help_hat.hat.empty() && help_hat.hat.empty()) {
+      std::cout << extra_help_hat.hat.top() << '\n';
+    }
+    if (extra_help_hat.hat.empty() && !help_hat.hat.empty()) {
+      std::cout << help_hat.hat.top() << '\n';
+    }
+    if (!extra_help_hat.hat.empty() && !help_hat.hat.empty()) {
+      std::cout << std::min(help_hat.hat.top(), extra_help_hat.hat.top()) << '\n';
+    }
   }
-  if (!extra_help_hat.empty() && help_hat.empty()) {
-    std::cout << extra_help_hat.top() << '\n';
-  }
-  if (extra_help_hat.empty() && !help_hat.empty()) {
-    std::cout << help_hat.top() << '\n';
-  }
-  if (!extra_help_hat.empty() && !help_hat.empty()) {
-    std::cout << std::min(help_hat.top(), extra_help_hat.top()) << '\n';
-  }
-}
 
 int main() {
-  std::stack<int> hat;
-  std::stack<int> help_hat;
-  std::stack<int> extra_hat;
-  std::stack<int> extra_help_hat;
+  the_hat hat;
+  the_hat help_hat;
+  the_hat extra_hat;
+  the_hat extra_help_hat;
   std::string input;
   int iqlevel = 0;
   int number_of_operations = 0;
@@ -96,19 +101,19 @@ int main() {
     std::cin >> input;
     if (input == "enqueue") {
       std::cin >> iqlevel;
-      GetEnqueued(hat, help_hat, iqlevel);
+      hat.GetEnqueued(help_hat, iqlevel);
     }
     if (input == "dequeue") {
-      GetDequeued(hat, help_hat, extra_hat, extra_help_hat);
+      hat.GetDequeued(help_hat, extra_hat, extra_help_hat);
     }
     if (input == "front") {
-      GetFronted(hat, help_hat, extra_hat, extra_help_hat);
+      hat.GetFronted(help_hat, extra_hat, extra_help_hat);
     }
     if (input == "size") {
       std::cout << hat.size() + extra_hat.size() << '\n';
     }
     if (input == "clear") {
-      GetCleared(hat, help_hat, extra_hat, extra_help_hat);
+      hat.GetCleared(help_hat, extra_hat, extra_help_hat);
     }
     if (input == "min") {
       GetMin(help_hat, extra_help_hat);
