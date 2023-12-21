@@ -2,12 +2,6 @@
 #include <vector>
 
 class the_heap {
- private:
-  void GetSilentlyExtracted() {
-    std::swap(heap[1], heap[heap.size() - 1]);
-    heap.pop_back();
-    GetSiftedDown(1);
-  }
  public:
   std::vector<int> heap;
   void GetSiftedUp(int the_index) {
@@ -75,6 +69,12 @@ class the_heap {
   }
   size_t size() const {
     return this->heap.size();
+  }
+ private:
+  void GetSilentlyExtracted() {
+    std::swap(heap[1], heap[heap.size() - 1]);
+    heap.pop_back();
+    GetSiftedDown(1);
   }
 };
 
